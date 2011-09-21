@@ -45,8 +45,10 @@ char *git_info() {
   FILE *fp;
   char *git_dir = get_git_dir();
   char *fname = strdup(git_dir);
-  char headfile[1024];
+  char *headfile = (char *)malloc(1024 * sizeof(char));
   char *git_info = (char *)malloc(1024 * sizeof(char));
+
+  char *orig_headfile = headfile;
 
   strcat(fname, "/HEAD");
 
@@ -55,10 +57,18 @@ char *git_info() {
   headfile[strlen(headfile)-1] = 0;
   fclose(fp);
 
+  if (strncmp(headfile, "ref: refs/heads/", 16) == 0) {
+    headfile += 16;
+  } else {
+    headfile[7] = 0; 
+  }
+
   sprintf(git_info, "%s%s%s",
       FMT_FG_MAGENTA,
       headfile,
       FMT_FG_RESET);
+
+  free(orig_headfile);
 
   return git_info;
 }
