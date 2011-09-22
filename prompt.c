@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define FMT_FG_RESET   "\x1b[0m"
 #define FMT_FG_BLACK   "\x1b[30m"
@@ -10,8 +11,8 @@
 #define FMT_FG_YELLOW  "\x1b[33m"
 #define FMT_FG_BLUE    "\x1b[34m"
 #define FMT_FG_MAGENTA "\x1b[35m"
-#define FMT_FG_CYAN    "\x1b[36m"
 #define FMT_FG_WHITE   "\x1b[37m"
+#define FMT_FG_GRAY    "\x1b[93m"
 
 char *get_git_dir() {
   FILE *fd;
@@ -22,6 +23,35 @@ char *get_git_dir() {
   git_dir[strlen(git_dir)-1] = 0;
   pclose(fd);
   return git_dir;
+}
+
+long git_last_commit() {
+  FILE *fd;
+  char timestamp[1024];
+
+  fd = popen("git log -n1 --format=%ct", "r");
+  while (fgets(timestamp, 1023, fd));
+  pclose(fd);
+
+  return atol(timestamp);
+}
+
+char *git_commit_time_elapsed() {
+  char *ret = (char *)malloc(sizeof(char) * 32);
+  long last_commit = git_last_commit();
+
+  long diff = time(NULL) - last_commit;
+  int diff_min = (int)(diff / 60);
+
+  if (diff_min < 10) {
+    sprintf(ret, "%s%dm%s", FMT_FG_GREEN, diff_min, FMT_FG_RESET);
+  } else if (diff_min < 30) {
+    sprintf(ret, "%s%dm%s", FMT_FG_YELLOW, diff_min, FMT_FG_RESET);
+  } else {
+    sprintf(ret, "%s%dm%s", FMT_FG_RED, diff_min, FMT_FG_RESET);
+  }
+
+  return ret;
 }
 
 char *git_info() {
@@ -109,10 +139,14 @@ char *git_info() {
   }
   strcat(stats_part, FMT_FG_RESET);
 
-  sprintf(git_info, "%s%s(%s)%s%s",
+  sprintf(git_info, "%s:%s%s%s(%s%s%s)%s%s ",
+      git_commit_time_elapsed(),
       FMT_FG_MAGENTA,
       headfile,
+      FMT_FG_BLACK,
+      FMT_FG_GRAY,
       commit_hash,
+      FMT_FG_BLACK,
       stats_part,
       FMT_FG_RESET);
 
