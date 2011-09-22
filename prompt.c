@@ -14,6 +14,10 @@
 #define FMT_FG_WHITE   "\x1b[37m"
 #define FMT_FG_GRAY    "\x1b[93m"
 
+#define FMT_STAGED     "\x1b[44;30m"
+#define FMT_UNSTAGED   "\x1b[34m"
+#define FMT_STAGED_UNSTAGED "\x1b[44;31m"
+
 char *get_git_dir() {
   FILE *fd;
   char *git_dir = (char *)malloc(1024 * sizeof(char));
@@ -122,25 +126,39 @@ char *git_info() {
   }
   pclose(fp);
 
-  strcat(stats_part, FMT_FG_BLUE);
   if (stats & 0x0001) {
+    strcat(stats_part, FMT_UNSTAGED);
+    if (stats & 0x0040) {
+      strcat(stats_part, FMT_STAGED_UNSTAGED);
+    }
     strcat(stats_part, "D");
   }
   if (stats & 0x0004) {
+    strcat(stats_part, FMT_UNSTAGED);
+    if (stats & 0x0100) {
+      strcat(stats_part, FMT_STAGED_UNSTAGED);
+    }
     strcat(stats_part, "M");
   }
   if (stats & 0x0010) {
+    strcat(stats_part, FMT_UNSTAGED);
+    if (stats & 0x0400) {
+      strcat(stats_part, FMT_STAGED_UNSTAGED);
+    }
     strcat(stats_part, "?");
   }
-  strcat(stats_part, FMT_FG_GREEN);
+  strcat(stats_part, FMT_STAGED);
   if (stats & 0x0040) {
-    strcat(stats_part, "D");
+    if (!(stats & 0x0001))
+      strcat(stats_part, "D");
   }
   if (stats & 0x0100) {
-    strcat(stats_part, "M");
+    if (!(stats & 0x0004))
+      strcat(stats_part, "M");
   }
   if (stats & 0x0400) {
-    strcat(stats_part, "?");
+    if (!(stats & 0x0010))
+      strcat(stats_part, "?");
   }
   strcat(stats_part, FMT_FG_RESET);
 
