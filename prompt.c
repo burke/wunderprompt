@@ -16,20 +16,13 @@
 int inp_exit_status;
 
 char *get_git_dir() {
-  FILE *fp;
-  int status;
-  char path[1035];
-  char *git_dir;
+  FILE *fd;
+  char *git_dir = (char *)malloc(1024 * sizeof(char));
 
-  fp = popen("/usr/local/bin/git rev-parse --git-dir", "r");
-  if (fp == NULL) {
-    /* failed to run command */
-  }
-  while (fgets(path, sizeof(path)-1, fp) != NULL) {
-    git_dir = path;
-  }
+  fd = popen("/usr/local/bin/git rev-parse --git-dir", "r");
+  while (fgets(git_dir, 1023, fd));
   git_dir[strlen(git_dir)-1] = 0;
-  pclose(fp);
+  pclose(fd);
   return git_dir;
 }
 
@@ -42,30 +35,71 @@ char *status_color() {
 }
 
 char *git_info() {
-  FILE *fp;
   char *git_dir = get_git_dir();
+  FILE *fp;
   char *fname = strdup(git_dir);
-  char *headfile = (char *)malloc(1024 * sizeof(char));
-  char *git_info = (char *)malloc(1024 * sizeof(char));
+  char *headfile    = (char *)malloc(1024 * sizeof(char));
+  char *git_info    = (char *)malloc(1024 * sizeof(char));
+  char *commit_hash = (char *)malloc(1024 * sizeof(char)); 
+  char *line        = (char *)malloc(1024 * sizeof(char)); 
+  int stats = 0;
+  char *stats_part = (char *)malloc(8 * sizeof(char));
 
   char *orig_headfile = headfile;
 
   strcat(fname, "/HEAD");
 
   fp = fopen(fname, "r");
-  fgets(headfile, 1023, fp);
+  sleep(0.2);
+  while (fgets(headfile, 1023, fp));
   headfile[strlen(headfile)-1] = 0;
   fclose(fp);
 
   if (strncmp(headfile, "ref: refs/heads/", 16) == 0) {
     headfile += 16;
+    fname = strdup(git_dir);
+    strcat(fname, "/refs/heads/");
+    strcat(fname, headfile);
+    fp = fopen(fname, "r");
+    while (fgets(commit_hash, 1023, fp));
+    commit_hash[7] = 0;
+    fclose(fp);
   } else {
-    headfile[7] = 0; 
+    headfile[7] = 0;
+    commit_hash = strdup(headfile);
   }
 
-  sprintf(git_info, "%s%s%s",
+  fp = popen("/usr/local/bin/git status --porcelain", "r");
+  while (fgets(line, 1023, fp)) {
+    switch(line[1]) {
+    case 'D':
+      stats |= 1;
+      break;
+    case 'M':
+      stats |= 2;
+      break;
+    case '?':
+      stats |= 4;
+      break;
+    }
+  }
+  pclose(fp);
+
+  if (stats & 1) {
+    strcat(stats_part, "D");
+  }
+  if (stats & 2) {
+    strcat(stats_part, "M");
+  }
+  if (stats & 4) {
+    strcat(stats_part, "?");
+  }
+
+  sprintf(git_info, "%s%s(%s)%s%s",
       FMT_FG_MAGENTA,
       headfile,
+      commit_hash,
+      stats_part,
       FMT_FG_RESET);
 
   free(orig_headfile);
