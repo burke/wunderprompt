@@ -139,7 +139,7 @@ char *git_info() {
   }
   strcat(stats_part, FMT_FG_RESET);
 
-  sprintf(git_info, "%s:%s%s%s(%s%s%s)%s%s ",
+  sprintf(git_info, "%s:%s%s%s(%s%s%s)%s%s",
       git_commit_time_elapsed(),
       FMT_FG_MAGENTA,
       headfile,
