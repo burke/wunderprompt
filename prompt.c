@@ -13,25 +13,15 @@
 #define FMT_FG_CYAN    "\x1b[36m"
 #define FMT_FG_WHITE   "\x1b[37m"
 
-int inp_exit_status;
-
 char *get_git_dir() {
   FILE *fd;
   char *git_dir = (char *)malloc(1024 * sizeof(char));
 
-  fd = popen("/usr/local/bin/git rev-parse --git-dir", "r");
+  fd = popen("git rev-parse --git-dir", "r");
   while (fgets(git_dir, 1023, fd));
   git_dir[strlen(git_dir)-1] = 0;
   pclose(fd);
   return git_dir;
-}
-
-char *status_color() {
-  if (inp_exit_status == 0) {
-    return FMT_FG_GREEN;
-  } else {
-    return FMT_FG_RED;
-  }
 }
 
 char *git_info() {
@@ -70,7 +60,7 @@ char *git_info() {
     commit_hash = strdup(headfile);
   }
 
-  fp = popen("/usr/local/bin/git status --porcelain", "r");
+  fp = popen("git status --porcelain", "r");
   while (fgets(line, 1023, fp)) {
     switch(line[1]) {
     case 'D':
@@ -131,20 +121,8 @@ char *git_info() {
   return git_info;
 }
 
-char *ruby_info() {
-  return "";
-}
-
-int main(int argc, char *argv[]) {
-  inp_exit_status = atoi(argv[1]);
-
-  printf("%s%%~ %s%s %s▸%s ",
-      FMT_FG_CYAN,
-      git_info(),
-      ruby_info(),
-      status_color(),
-      FMT_FG_RESET);
-
+int main() {
+  printf("%s", git_info());
   return 0;
 }
 
