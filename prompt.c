@@ -43,6 +43,7 @@ char *git_info() {
   char *commit_hash = (char *)malloc(1024 * sizeof(char)); 
   char *line        = (char *)malloc(1024 * sizeof(char)); 
   int stats = 0;
+  int lstats = 0;
   char *stats_part = (char *)malloc(8 * sizeof(char));
 
   char *orig_headfile = headfile;
@@ -73,27 +74,50 @@ char *git_info() {
   while (fgets(line, 1023, fp)) {
     switch(line[1]) {
     case 'D':
-      stats |= 1;
+      stats |= 0x0001;
       break;
     case 'M':
-      stats |= 2;
+      stats |= 0x0004;
       break;
     case '?':
-      stats |= 4;
+      stats |= 0x0010;
+      break;
+    }
+    switch(line[0]) {
+    case 'D':
+      stats |= 0x0040;
+      break;
+    case 'M':
+      stats |= 0x0100;
+      break;
+    case '?':
+      stats |= 0x0400;
       break;
     }
   }
   pclose(fp);
 
-  if (stats & 1) {
+  strcat(stats_part, FMT_FG_BLUE);
+  if (stats & 0x0001) {
     strcat(stats_part, "D");
   }
-  if (stats & 2) {
+  if (stats & 0x0004) {
     strcat(stats_part, "M");
   }
-  if (stats & 4) {
+  if (stats & 0x0010) {
     strcat(stats_part, "?");
   }
+  strcat(stats_part, FMT_FG_GREEN);
+  if (stats & 0x0040) {
+    strcat(stats_part, "D");
+  }
+  if (stats & 0x0100) {
+    strcat(stats_part, "M");
+  }
+  if (stats & 0x0400) {
+    strcat(stats_part, "?");
+  }
+  strcat(stats_part, FMT_FG_RESET);
 
   sprintf(git_info, "%s%s(%s)%s%s",
       FMT_FG_MAGENTA,
