@@ -47,9 +47,14 @@ char *git_commit_time_elapsed() {
     sprintf(ret, "%s%d%s", FMT_FG_GREEN, diff_min, FMT_FG_RESET);
   } else if (diff_min < 30) {
     sprintf(ret, "%s%d%s", FMT_FG_YELLOW, diff_min, FMT_FG_RESET);
-  } else {
+  } else if (diff_min < 120) {
     sprintf(ret, "%s%d%s", FMT_FG_RED, diff_min, FMT_FG_RESET);
+  } else if (diff_min < 1440) {
+    sprintf(ret, "%s%dh%s", FMT_FG_RED, diff_min/60, FMT_FG_RESET);
+  } else {
+    sprintf(ret, "%s%dd%s", FMT_FG_RED, diff_min/1440, FMT_FG_RESET);
   }
+
 
   return ret;
 }
