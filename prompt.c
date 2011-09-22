@@ -18,15 +18,13 @@
 #define FMT_UNSTAGED   "\x1b[34m"
 #define FMT_STAGED_UNSTAGED "\x1b[44;31m"
 
-char *get_git_dir() {
+void get_git_dir(char *git_dir) {
   FILE *fd;
-  char *git_dir = (char *)malloc(1024 * sizeof(char));
 
   fd = popen("git rev-parse --git-dir", "r");
   while (fgets(git_dir, 1023, fd));
   git_dir[strlen(git_dir)-1] = 0;
   pclose(fd);
-  return git_dir;
 }
 
 long git_last_commit() {
@@ -40,8 +38,7 @@ long git_last_commit() {
   return atol(timestamp);
 }
 
-char *git_commit_time_elapsed() {
-  char *ret = (char *)malloc(sizeof(char) * 32);
+void git_commit_time_elapsed(char *ret) {
   long last_commit = git_last_commit();
 
   long diff = time(NULL) - last_commit;
@@ -58,48 +55,15 @@ char *git_commit_time_elapsed() {
   } else {
     sprintf(ret, "%s%dd%s", FMT_FG_RED, diff_min/1440, FMT_FG_RESET);
   }
-
-
-  return ret;
 }
 
-char *git_info() {
-  char *git_dir = get_git_dir();
+void git_dirty_info(char *stats_part) {
   FILE *fp;
-  char *fname = strdup(git_dir);
-  char *headfile    = (char *)malloc(1024 * sizeof(char));
-  char *git_info    = (char *)malloc(1024 * sizeof(char));
-  char *commit_hash = (char *)malloc(1024 * sizeof(char)); 
-  char *line        = (char *)malloc(1024 * sizeof(char)); 
   int stats = 0;
-  int lstats = 0;
-  char *stats_part = (char *)malloc(8 * sizeof(char));
-
-  char *orig_headfile = headfile;
-
-  strcat(fname, "/HEAD");
-
-  fp = fopen(fname, "r");
-  sleep(0.2);
-  while (fgets(headfile, 1023, fp));
-  headfile[strlen(headfile)-1] = 0;
-  fclose(fp);
-
-  if (strncmp(headfile, "ref: refs/heads/", 16) == 0) {
-    headfile += 16;
-    fname = strdup(git_dir);
-    strcat(fname, "/refs/heads/");
-    strcat(fname, headfile);
-    fp = fopen(fname, "r");
-    while (fgets(commit_hash, 1023, fp));
-    commit_hash[7] = 0;
-    fclose(fp);
-  } else {
-    headfile[7] = 0;
-    commit_hash = strdup(headfile);
-  }
+  char line[1024];
 
   fp = popen("git status --porcelain", "r");
+
   while (fgets(line, 1023, fp)) {
     switch(line[1]) {
     case 'D':
@@ -147,6 +111,7 @@ char *git_info() {
     }
     strcat(stats_part, "?");
   }
+  strcat(stats_part, FMT_FG_RESET);
   strcat(stats_part, FMT_STAGED);
   if (stats & 0x0040) {
     if (!(stats & 0x0001))
@@ -161,20 +126,58 @@ char *git_info() {
       strcat(stats_part, "?");
   }
   strcat(stats_part, FMT_FG_RESET);
+}
+
+void refname_and_commit_hash(const char *git_dir, char *refname, char *commit_hash) {
+  FILE *fp;
+  char *filename = strdup(git_dir);
+  strcat(filename, "/HEAD");
+
+  fp = fopen(filename, "r");
+  sleep(0.2);
+  while (fgets(refname, 1023, fp));
+  refname[strlen(refname)-1] = 0;
+  fclose(fp);
+
+  if (strncmp(refname, "ref: refs/heads/", 16) == 0) {
+    strcpy(refname, refname + 16);
+    filename = strdup(git_dir);
+    strcat(filename, "/refs/heads/");
+    strcat(filename, refname);
+    fp = fopen(filename, "r");
+    while (fgets(commit_hash, 1023, fp));
+    commit_hash[7] = 0;
+    fclose(fp);
+  } else {
+    refname[7] = 0;
+    commit_hash = strdup(refname);
+  }
+}
+
+char *git_info() {
+  char *refname      = (char *)malloc(1024 * sizeof(char));
+  char *git_info     = (char *)malloc(1024 * sizeof(char));
+  char *commit_hash  = (char *)malloc(1024 * sizeof(char)); 
+  char *git_d_info   = (char *)malloc(1024 * sizeof(char)); 
+  char *time_elapsed = (char *)malloc(1024 * sizeof(char)); 
+  char *git_dir      = (char *)malloc(1024 * sizeof(char)); 
+
+  git_commit_time_elapsed(time_elapsed);
+  git_dirty_info(git_d_info);
+  get_git_dir(git_dir);
+  refname_and_commit_hash(git_dir, refname, commit_hash);
 
   sprintf(git_info, "%s%s:%s%s%s:%s%s%s:%s%s",
-      git_commit_time_elapsed(),
+      time_elapsed,
       FMT_FG_BLACK,
       FMT_FG_MAGENTA,
-      headfile,
+      refname,
       FMT_FG_BLACK,
       FMT_FG_GRAY,
       commit_hash,
       FMT_FG_BLACK,
-      stats_part,
+      git_d_info,
       FMT_FG_RESET);
-
-  free(orig_headfile);
 
   return git_info;
 }
