@@ -170,7 +170,11 @@ char *git_info() {
   get_refname(git_dir, refname);
   get_refname_color(git_dir, refname, dirty, refname_color);
 
-  sprintf(git_info, "%s %s%s %s%s",
+  if (strlen(git_d_info) != 0) {
+    strcat(refname, " ");
+  }
+
+  sprintf(git_info, "%s %s%s%s%s",
       time_elapsed,
       refname_color,
       refname,
