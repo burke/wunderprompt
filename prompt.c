@@ -18,12 +18,11 @@
 #define FMT_UNSTAGED   "%{\x1b[34m%}"
 #define FMT_STAGED_UNSTAGED "%{\x1b[31m%}"
 
-
 void get_git_dir(char *git_dir) {
   FILE *fd;
 
   fd = popen("git rev-parse --git-dir", "r");
-  while (fgets(git_dir, 1023, fd));
+  fgets(git_dir, 1023, fd);
   git_dir[strlen(git_dir)-1] = 0;
   pclose(fd);
 }
@@ -33,7 +32,7 @@ long git_last_commit() {
   char timestamp[1024];
 
   fd = popen("git log -n1 --format=%ct", "r");
-  while (fgets(timestamp, 1023, fd));
+  fgets(timestamp, 1023, fd);
   pclose(fd);
 
   return atol(timestamp);
@@ -129,36 +128,25 @@ void git_dirty_info(char *stats_part) {
   strcat(stats_part, FMT_FG_RESET);
 }
 
-void refname_and_commit_hash(const char *git_dir, char *refname, char *commit_hash) {
+void get_refname(const char *git_dir, char *refname) {
   FILE *fp;
   char *filename = strdup(git_dir);
   strcat(filename, "/HEAD");
 
   fp = fopen(filename, "r");
-  sleep(0.2);
-  while (fgets(refname, 1023, fp));
+  fgets(refname, 1023, fp);
   refname[strlen(refname)-1] = 0;
   fclose(fp);
 
   if (strncmp(refname, "ref: refs/heads/", 16) == 0) {
     strcpy(refname, refname + 16);
     filename = strdup(git_dir);
-    strcat(filename, "/refs/heads/");
-    strcat(filename, refname);
-    fp = fopen(filename, "r");
-    while (fgets(commit_hash, 1023, fp));
-    commit_hash[7] = 0;
-    fclose(fp);
-  } else {
-    refname[7] = 0;
-    commit_hash = strdup(refname);
   }
 }
 
 char *git_info() {
   char *refname      = (char *)malloc(1024 * sizeof(char));
   char *git_info     = (char *)malloc(1024 * sizeof(char));
-  char *commit_hash  = (char *)malloc(1024 * sizeof(char)); 
   char *git_d_info   = (char *)malloc(1024 * sizeof(char)); 
   char *time_elapsed = (char *)malloc(1024 * sizeof(char)); 
   char *git_dir      = (char *)malloc(1024 * sizeof(char)); 
@@ -166,17 +154,12 @@ char *git_info() {
   git_commit_time_elapsed(time_elapsed);
   git_dirty_info(git_d_info);
   get_git_dir(git_dir);
-  refname_and_commit_hash(git_dir, refname, commit_hash);
+  get_refname(git_dir, refname);
 
-  sprintf(git_info, "%s%s:%s%s%s:%s%s%s:%s%s",
+  sprintf(git_info, "%s %s%s %s%s",
       time_elapsed,
-      FMT_FG_BLACK,
       FMT_FG_MAGENTA,
       refname,
-      FMT_FG_BLACK,
-      FMT_FG_GRAY,
-      commit_hash,
-      FMT_FG_BLACK,
       git_d_info,
       FMT_FG_RESET);
 
