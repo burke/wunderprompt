@@ -57,7 +57,7 @@ void git_commit_time_elapsed(char *ret) {
   }
 }
 
-void git_dirty_info(char *stats_part) {
+int git_dirty_info(char *stats_part) {
   FILE *fp;
   int stats = 0;
   char line[1024];
@@ -126,6 +126,8 @@ void git_dirty_info(char *stats_part) {
       strcat(stats_part, "?");
   }
   strcat(stats_part, FMT_FG_RESET);
+
+  return stats;
 }
 
 void get_refname(const char *git_dir, char *refname) {
@@ -144,21 +146,33 @@ void get_refname(const char *git_dir, char *refname) {
   }
 }
 
+void get_refname_color(const char *git_dir, const char *refname, const int dirty, char *refname_color) {
+  if (dirty) {
+    sprintf(refname_color, "%s", FMT_FG_MAGENTA);
+  } else {
+    sprintf(refname_color, "%s", FMT_FG_GREEN);
+  }
+}
+
 char *git_info() {
   char *refname      = (char *)malloc(1024 * sizeof(char));
   char *git_info     = (char *)malloc(1024 * sizeof(char));
   char *git_d_info   = (char *)malloc(1024 * sizeof(char)); 
   char *time_elapsed = (char *)malloc(1024 * sizeof(char)); 
   char *git_dir      = (char *)malloc(1024 * sizeof(char)); 
+  char *refname_color= (char *)malloc(1024 * sizeof(char)); 
+
+  int dirty;
 
   git_commit_time_elapsed(time_elapsed);
-  git_dirty_info(git_d_info);
+  dirty = git_dirty_info(git_d_info);
   get_git_dir(git_dir);
   get_refname(git_dir, refname);
+  get_refname_color(git_dir, refname, dirty, refname_color);
 
   sprintf(git_info, "%s %s%s %s%s",
       time_elapsed,
-      FMT_FG_MAGENTA,
+      refname_color,
       refname,
       git_d_info,
       FMT_FG_RESET);
