@@ -176,6 +176,10 @@ char *git_info() {
   get_refname(git_dir, refname);
   get_refname_color(git_dir, refname, dirty, refname_color);
 
+  if (!strcmp(refname, "master")) {
+    strcpy(refname, "m*");
+  }
+
   if (strlen(git_d_info) != 0) {
     strcat(refname, " ");
   }
