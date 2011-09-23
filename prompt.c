@@ -96,6 +96,7 @@ int git_dirty_info(char *stats_part) {
       strcat(stats_part, FMT_STAGED_UNSTAGED);
     }
     strcat(stats_part, "D");
+  strcat(stats_part, FMT_FG_RESET);
   }
   if (stats & 0x0004) {
     strcat(stats_part, FMT_UNSTAGED);
@@ -103,6 +104,7 @@ int git_dirty_info(char *stats_part) {
       strcat(stats_part, FMT_STAGED_UNSTAGED);
     }
     strcat(stats_part, "M");
+  strcat(stats_part, FMT_FG_RESET);
   }
   if (stats & 0x0010) {
     strcat(stats_part, FMT_UNSTAGED);
@@ -110,22 +112,26 @@ int git_dirty_info(char *stats_part) {
       strcat(stats_part, FMT_STAGED_UNSTAGED);
     }
     strcat(stats_part, "?");
-  }
   strcat(stats_part, FMT_FG_RESET);
-  strcat(stats_part, FMT_STAGED);
+  }
   if (stats & 0x0040) {
+  strcat(stats_part, FMT_STAGED);
     if (!(stats & 0x0001))
       strcat(stats_part, "D");
+  strcat(stats_part, FMT_FG_RESET);
   }
   if (stats & 0x0100) {
+  strcat(stats_part, FMT_STAGED);
     if (!(stats & 0x0004))
       strcat(stats_part, "M");
+  strcat(stats_part, FMT_FG_RESET);
   }
   if (stats & 0x0400) {
+  strcat(stats_part, FMT_STAGED);
     if (!(stats & 0x0010))
       strcat(stats_part, "?");
-  }
   strcat(stats_part, FMT_FG_RESET);
+  }
 
   return stats;
 }
