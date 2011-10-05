@@ -1,6 +1,7 @@
 #include <stdio.h> #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <time.h>
 
 #define FMT_FG_RESET   "%{\x1b[0m%}"
@@ -159,20 +160,10 @@ void get_refname_color(const char *git_dir, const char *refname, const int dirty
   }
 }
 
-int file_exists(const char *filename) {
-  FILE *fp;
-  fp = fopen(filename, "r");
-  if (fp) {
-    fclose(fp);
-    return 1;
-  }
-  return 0;
-}
-
 void get_stash_info(const char *git_dir, char *output) {
   char *stashfile = strdup(git_dir);
   strcat(stashfile, "/refs/stash");
-  if (file_exists(stashfile)) {
+  if (! access(stashfile, F_OK)) {
     sprintf(output, "%s+", FMT_FG_WHITE);
   } else {
     output[0] = 0;
