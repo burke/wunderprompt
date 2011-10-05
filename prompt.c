@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
+#include <stdio.h> #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -160,13 +159,34 @@ void get_refname_color(const char *git_dir, const char *refname, const int dirty
   }
 }
 
+int file_exists(const char *filename) {
+  FILE *fp;
+  fp = fopen(filename, "r");
+  if (fp) {
+    fclose(fp);
+    return 1;
+  }
+  return 0;
+}
+
+void get_stash_info(const char *git_dir, char *output) {
+  char *stashfile = strdup(git_dir);
+  strcat(stashfile, "/refs/stash");
+  if (file_exists(stashfile)) {
+    sprintf(output, "%s+", FMT_FG_WHITE);
+  } else {
+    output[0] = 0;
+  }
+}
+
 char *git_info() {
   char *refname      = (char *)malloc(1024 * sizeof(char));
   char *git_info     = (char *)malloc(1024 * sizeof(char));
-  char *git_d_info   = (char *)malloc(1024 * sizeof(char)); 
-  char *time_elapsed = (char *)malloc(1024 * sizeof(char)); 
-  char *git_dir      = (char *)malloc(1024 * sizeof(char)); 
-  char *refname_color= (char *)malloc(1024 * sizeof(char)); 
+  char *git_d_info   = (char *)malloc(1024 * sizeof(char));
+  char *time_elapsed = (char *)malloc(1024 * sizeof(char));
+  char *git_dir      = (char *)malloc(1024 * sizeof(char));
+  char *stash_info   = (char *)malloc(1024 * sizeof(char));
+  char *refname_color= (char *)malloc(1024 * sizeof(char));
 
   int dirty;
 
@@ -175,19 +195,21 @@ char *git_info() {
   get_git_dir(git_dir);
   get_refname(git_dir, refname);
   get_refname_color(git_dir, refname, dirty, refname_color);
+  get_stash_info(git_dir, stash_info);
 
   if (!strcmp(refname, "master")) {
     strcpy(refname, "*");
   }
 
   if (strlen(git_d_info) != 0) {
-    strcat(refname, " ");
+    strcat(stash_info, " ");
   }
 
-  sprintf(git_info, "%s %s%s%s%s",
+  sprintf(git_info, "%s %s%s%s%s%s",
       time_elapsed,
       refname_color,
       refname,
+      stash_info,
       git_d_info,
       FMT_FG_RESET);
 
