@@ -173,7 +173,7 @@ void get_stash_info(const char *git_dir, char *output) {
 
 int main() {
   char refname[128];
-  char git_d_info[32];
+  char git_d_info[512];
   char time_elapsed[32];
   char git_dir[512];
   char stash_info[32];
