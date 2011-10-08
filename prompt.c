@@ -171,14 +171,13 @@ void get_stash_info(const char *git_dir, char *output) {
   }
 }
 
-char *git_info() {
-  char *refname      = (char *)malloc(1024 * sizeof(char));
-  char *git_info     = (char *)malloc(1024 * sizeof(char));
-  char *git_d_info   = (char *)malloc(1024 * sizeof(char));
-  char *time_elapsed = (char *)malloc(1024 * sizeof(char));
-  char *git_dir      = (char *)malloc(1024 * sizeof(char));
-  char *stash_info   = (char *)malloc(1024 * sizeof(char));
-  char *refname_color= (char *)malloc(1024 * sizeof(char));
+int main() {
+  char refname[128];
+  char git_d_info[32];
+  char time_elapsed[32];
+  char git_dir[512];
+  char stash_info[32];
+  char refname_color[32];
 
   int dirty;
 
@@ -197,19 +196,14 @@ char *git_info() {
     strcat(stash_info, " ");
   }
 
-  sprintf(git_info, "%s %s%s%s%s%s",
+  printf("%s %s%s%s%s%s",
       time_elapsed,
       refname_color,
       refname,
       stash_info,
       git_d_info,
       FMT_FG_RESET);
-
-  return git_info;
-}
-
-int main() {
-  printf("%s", git_info());
   return 0;
 }
+
 
