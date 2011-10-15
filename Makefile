@@ -5,3 +5,6 @@ prompt: prompt.c
 
 ruby_info: ruby_info.c
 	cc -Wall -O3 ruby_info.c -o ruby_info
+
+clean:
+	rm -rf ruby_info prompt
