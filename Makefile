@@ -8,3 +8,7 @@ ruby_info: ruby_info.c
 
 clean:
 	rm -rf ruby_info prompt
+
+install: all
+	chmod +x ruby_info prompt
+	mv ruby_info prompt /usr/local/bin/
