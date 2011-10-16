@@ -1,14 +1,22 @@
-all: prompt ruby_info 
+CFLAGS:=-Wall -O3
+SHELL:=ZSH
 
-prompt: prompt.c 
-		cc -Wall -O3 prompt.c -o prompt
+DEFS=-D$(SHELL)
+objects=prompt ruby_info
+binaries=$(objects)
+bin_dir=/usr/local/bin
 
-ruby_info: ruby_info.c
-	cc -Wall -O3 ruby_info.c -o ruby_info
+prompt: prompt.c colors.h
+	$(CC) $(CFLAGS) $(DEFS) -o prompt prompt.c
+
+ruby_info: ruby_info.c colors.h
+	$(CC) $(CFLAGS) $(DEFS) -o ruby_info ruby_info.c
+
+all: $(objects)
 
 clean:
-	rm -rf ruby_info prompt
+	rm -rf $(objects)
 
 install: all
-	chmod +x ruby_info prompt
-	mv ruby_info prompt /usr/local/bin/
+	chmod +x $(objects)
+	mv $(binaries) $(bin_dir)

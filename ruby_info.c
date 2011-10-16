@@ -1,16 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define RESET   "%{\x1b[0m%}"
-#define BLACK   "%{\x1b[30m%}"
-#define RED     "%{\x1b[31m%}"
-#define GREEN   "%{\x1b[32m%}"
-#define YELLOW  "%{\x1b[33m%}"
-#define BLUE    "%{\x1b[34m%}"
-#define MAGENTA "%{\x1b[35m%}"
-#define WHITE   "%{\x1b[37m%}"
-#define GRAY    "%{\x1b[93m%}"
+#include "colors.h"
 
 #define RUBY_IS(x) ((!strncmp(ruby, x, strlen(x))))
 
@@ -31,20 +22,20 @@ int main() {
   }
 
   if RUBY_IS("ruby-1.9.2-") {
-    ruby = YELLOW;
+    ruby = FMT_FG_YELLOW;
   } else if RUBY_IS("ree-1.8.7-") {
-    ruby = MAGENTA;
+    ruby = FMT_FG_MAGENTA;
   } else if RUBY_IS("rbx-") {
-    ruby = BLUE;
+    ruby = FMT_FG_BLUE;
   } else if RUBY_IS("jruby") {
-    ruby = GREEN;
+    ruby = FMT_FG_GREEN;
   } else if RUBY_IS("ruby-1.9.3") {
-    ruby = WHITE;
+    ruby = FMT_FG_WHITE;
   } else {
-    ruby = RED;
+    ruby = FMT_FG_RED;
   }
 
-  printf("%s%s%s", ruby, gemset, RESET);
+  printf("%s%s%s", ruby, gemset, FMT_FG_RESET);
 
   return 0;
 }
