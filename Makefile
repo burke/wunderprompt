@@ -1,10 +1,15 @@
-CFLAGS:=-Wall -O3
-SHELL:=ZSH
+CFLAGS     := -Wall -O3
+SHELL       = /bin/sh
+SHELL_NAME := ZSH
 
-DEFS=-D$(SHELL)
-objects=prompt ruby_info
-binaries=$(objects)
-bin_dir=/usr/local/bin
+DEFS     = -D$(SHELL_NAME)
+objects  = prompt ruby_info
+binaries = $(objects)
+bindir   = bin
+
+prefix       := /usr/local
+exec_prefix  := $(prefix)
+bindir       := $(exec_prefix)/bin
 
 prompt: prompt.c colours.h
 	$(CC) $(CFLAGS) $(DEFS) -o prompt prompt.c
@@ -18,5 +23,5 @@ clean:
 	rm -rf $(objects)
 
 install: all
-	chmod +x $(objects)
-	mv $(binaries) $(bin_dir)
+	$(INSTALL_PROGRAM) prompt    $(bindir)/prompt
+	$(INSTALL_PROGRAM) ruby_info $(bindir)/ruby_info
