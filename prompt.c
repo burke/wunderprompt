@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-#include "colors.h"
+#include "colours.h"
 
 void get_git_dir(char *git_dir) {
   FILE *fd;

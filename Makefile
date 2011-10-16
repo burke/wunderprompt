@@ -6,10 +6,10 @@ objects=prompt ruby_info
 binaries=$(objects)
 bin_dir=/usr/local/bin
 
-prompt: prompt.c colors.h
+prompt: prompt.c colours.h
 	$(CC) $(CFLAGS) $(DEFS) -o prompt prompt.c
 
-ruby_info: ruby_info.c colors.h
+ruby_info: ruby_info.c colours.h
 	$(CC) $(CFLAGS) $(DEFS) -o ruby_info ruby_info.c
 
 all: $(objects)
