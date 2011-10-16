@@ -33,15 +33,15 @@ void git_commit_time_elapsed(char *ret) {
   int diff_min = (int)(diff / 60);
 
   if (diff_min < 10) {
-    sprintf(ret, "%s%d%s", FMT_FG_GREEN, diff_min, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%d%s", FMT_FG_GREEN, diff_min, FMT_FG_RESET);
   } else if (diff_min < 30) {
-    sprintf(ret, "%s%d%s", FMT_FG_YELLOW, diff_min, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%d%s", FMT_FG_YELLOW, diff_min, FMT_FG_RESET);
   } else if (diff_min < 120) {
-    sprintf(ret, "%s%d%s", FMT_FG_RED, diff_min, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%d%s", FMT_FG_RED, diff_min, FMT_FG_RESET);
   } else if (diff_min < 1440) {
-    sprintf(ret, "%s%dh%s", FMT_FG_RED, diff_min/60, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%dh%s", FMT_FG_RED, diff_min/60, FMT_FG_RESET);
   } else {
-    sprintf(ret, "%s%dd%s", FMT_FG_RED, diff_min/1440, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%dd%s", FMT_FG_RED, diff_min/1440, FMT_FG_RESET);
   }
 }
 
@@ -142,9 +142,9 @@ void get_refname(const char *git_dir, char *refname) {
 
 void get_refname_color(const char *git_dir, const char *refname, const int dirty, char *refname_color) {
   if (dirty) {
-    sprintf(refname_color, "%s", FMT_FG_MAGENTA);
+    snprintf(refname_color,sizeof(refname_color), "%s", FMT_FG_MAGENTA);
   } else {
-    sprintf(refname_color, "%s", FMT_FG_GREEN);
+    snprintf(refname_color,sizeof(refname_color), "%s", FMT_FG_GREEN);
   }
 }
 
@@ -152,7 +152,7 @@ void get_stash_info(const char *git_dir, char *output) {
   char *stashfile = strdup(git_dir);
   strcat(stashfile, "/refs/stash");
   if (! access(stashfile, F_OK)) {
-    sprintf(output, "%s+", FMT_FG_WHITE);
+    snprintf(output,sizeof(output), "%s+", FMT_FG_WHITE);
   } else {
     output[0] = 0;
   }
@@ -192,5 +192,4 @@ int main() {
       FMT_FG_RESET);
   return 0;
 }
-
 
