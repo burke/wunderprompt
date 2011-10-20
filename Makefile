@@ -4,8 +4,8 @@ SHELL_NAME := ZSH
 INSTALL    := install
 
 DEFS     = -D$(SHELL_NAME)
-objects  = prompt ruby_info
-binaries = $(objects)
+objects  = ruby_info git-prompt-helper git-ref-and-time prompt
+binaries = ruby_info git-ref-and-time prompt
 bindir   = bin
 
 prefix       := /usr/local
@@ -13,13 +13,20 @@ exec_prefix  := $(prefix)
 bindir       := $(exec_prefix)/bin
 srcdir       := ./
 
-prompt: prompt.c colours.h
-	$(CC) $(CFLAGS) $(DEFS) -o prompt prompt.c
+deps = git-prompt-helper.c git-prompt-helper.h colours.h
+
+git-prompt-helper: git-prompt-helper.c git-prompt-helper.h
+
+prompt: $(deps)
+	$(CC) $(CFLAGS) $(DEFS) -o prompt $(deps) prompt.c
+
+git-ref-and-time:  $(deps)
+	$(CC) $(CFLAGS) $(DEFS) -o git-ref-and-time $(deps) git-ref-and-time.c
 
 ruby_info: ruby_info.c colours.h
 	$(CC) $(CFLAGS) $(DEFS) -o ruby_info ruby_info.c
 
-all: $(objects)
+all: $(binaries)
 
 clean:
 	rm -rf $(objects)

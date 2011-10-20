@@ -15,7 +15,6 @@ int main() {
   get_git_dir(git_dir);
   get_refname(git_dir, refname);
   get_refname_color(git_dir, refname, dirty, refname_color);
-  get_stash_info(git_dir, stash_info);
 
   if (!strcmp(refname, "master")) {
     strcpy(refname, "*");
@@ -25,12 +24,10 @@ int main() {
     strcat(stash_info, " ");
   }
 
-  printf("%s%s %s%s%s%s",
+  printf("%s%s|%s%s",
       refname_color,
       refname,
       time_elapsed,
-      stash_info,
-      git_d_info,
       FMT_FG_RESET);
   return 0;
 }
