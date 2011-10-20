@@ -24,10 +24,11 @@ int main() {
     strcat(stash_info, " ");
   }
 
-  printf("%s%s|%s%s",
+  printf("%s%s(%s%s)%s",
       refname_color,
       refname,
       time_elapsed,
+      refname_color,
       FMT_FG_RESET);
   return 0;
 }
