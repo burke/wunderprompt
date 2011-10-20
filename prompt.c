@@ -183,12 +183,10 @@ int main() {
     strcat(stash_info, " ");
   }
 
-  printf("%s %s%s%s%s%s",
-      time_elapsed,
+  printf("%s%s|%s%s",
       refname_color,
       refname,
-      stash_info,
-      git_d_info,
+      time_elapsed,
       FMT_FG_RESET);
   return 0;
 }
