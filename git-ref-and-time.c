@@ -30,6 +30,7 @@ int main() {
       time_elapsed,
       refname_color,
       FMT_FG_RESET);
+
   return 0;
 }
 
