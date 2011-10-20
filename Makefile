@@ -4,7 +4,7 @@ SHELL_NAME := ZSH
 INSTALL    := install
 
 DEFS     = -D$(SHELL_NAME)
-objects  = ruby_info git-prompt-helper git-ref-and-time prompt
+objects  = git-prompt-helper
 binaries = ruby_info git-ref-and-time prompt
 bindir   = bin
 
@@ -29,11 +29,12 @@ ruby_info: ruby_info.c colours.h
 all: $(binaries)
 
 clean:
-	rm -rf $(objects)
+	rm -rf $(objects) $(binaries)
 
 install: all
-	$(INSTALL) prompt    $(bindir)/prompt
-	$(INSTALL) ruby_info $(bindir)/ruby_info
+	$(INSTALL) prompt              $(bindir)/prompt
+	$(INSTALL) ruby_info           $(bindir)/ruby_info
+	$(INSTALL) git-ref-and-time    $(bindir)/git-ref-and-time
 
 uninstall:
 	rm -rf $(bindir)/prompt
