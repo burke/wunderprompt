@@ -27,11 +27,11 @@ void git_commit_time_elapsed(char *ret) {
   int diff_min = (int)(diff / 60);
 
   if (diff_min < 10) {
-    snprintf(ret,sizeof(ret), "%s%d%s", FMT_FG_GREEN, diff_min, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%dm%s", FMT_FG_GREEN, diff_min, FMT_FG_RESET);
   } else if (diff_min < 30) {
-    snprintf(ret,sizeof(ret), "%s%d%s", FMT_FG_YELLOW, diff_min, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%dm%s", FMT_FG_YELLOW, diff_min, FMT_FG_RESET);
   } else if (diff_min < 120) {
-    snprintf(ret,sizeof(ret), "%s%d%s", FMT_FG_RED, diff_min, FMT_FG_RESET);
+    snprintf(ret,sizeof(ret), "%s%dm%s", FMT_FG_RED, diff_min, FMT_FG_RESET);
   } else if (diff_min < 1440) {
     snprintf(ret,sizeof(ret), "%s%dh%s", FMT_FG_RED, diff_min/60, FMT_FG_RESET);
   } else {
