@@ -20,45 +20,42 @@ long git_last_commit() {
   return atol(timestamp);
 }
 
-void git_commit_time_elapsed(char *ret)
+void git_commit_time_elapsed(char *ret, size_t len)
 {
   long last_commit = git_last_commit();
-  int len          = 8;
-  long diff        = time(NULL) - last_commit;
-  int diff_min     = (int)(diff / 60);
+  long min         = (time(NULL) - last_commit) / 60;
   char suffix;
   char *color;
-  int humanized_elapsed_time = diff_min;
 
-  if (diff_min < 10)
+  if (min < 10)
   {
     suffix = 'm';
     color  = FMT_FG_GREEN;
   }
-  else if (diff_min < 30)
+  else if (min < 30)
   {
     suffix = 'm';
-    color = FMT_FG_YELLOW;
+    color  = FMT_FG_YELLOW;
   }
-  else if (diff_min < 120)
+  else if (min < 120)
   {
     suffix = 'm';
-    color = FMT_FG_RED;
+    color  = FMT_FG_RED;
   }
-  else if (diff_min < 1440)
+  else if (min < 1440)
   {
     suffix = 'h';
-    color = FMT_FG_RED;
-    humanized_elapsed_time = diff_min/60;
+    color  = FMT_FG_RED;
+    min   /= 60;
   }
   else
   {
     suffix = 'd';
-    color = FMT_FG_RED;
-    humanized_elapsed_time = diff_min/1440;
+    color  = FMT_FG_RED;
+    min   /= 1440;
   }
 
-  snprintf(ret, len, "%s%d%c%s", color, humanized_elapsed_time, suffix, FMT_FG_RESET);
+  snprintf(ret, len, "%s%ld%c%s", color, min, suffix, FMT_FG_RESET);
 }
 
 int git_dirty_info(char *stats_part) {

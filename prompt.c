@@ -10,7 +10,7 @@ int main() {
 
   int dirty;
 
-  git_commit_time_elapsed(time_elapsed);
+  git_commit_time_elapsed(time_elapsed, sizeof(time_elapsed));
   dirty = git_dirty_info(git_d_info);
   get_git_dir(git_dir);
   get_refname(git_dir, refname);
