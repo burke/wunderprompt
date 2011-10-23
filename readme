@@ -1,0 +1,7 @@
+Todo
+====
+
+[ ] new git repo, thinks its last update was some time ago, this is clearly invalid, their must be another way of displaying this
+[ ] w/m/y to elapsed time?
+[ ] fix segfault when not in repo
+[ ] single binary with format string
