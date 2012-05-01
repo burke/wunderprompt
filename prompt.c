@@ -162,12 +162,18 @@ void get_refname_color(const char *git_dir, const char *refname, const int dirty
 }
 
 void get_stash_info(const char *git_dir, char *output) {
-  char *stashfile = strdup(git_dir);
-  strcat(stashfile, "/refs/stash");
-  if (! access(stashfile, F_OK)) {
-    sprintf(output, "%s+", FMT_FG_WHITE);
-  } else {
+  FILE *fp;
+  char buf[2000];
+  int counter = 0;
+  char *filename = strdup(git_dir);
+  strcat(filename, "/logs/refs/stash");
+
+  if (access(filename, F_OK)) {
     output[0] = 0;
+  } else {
+    fp = fopen(filename, "r");
+    while (fgets(buf, 2000, fp) != NULL) counter++;
+    sprintf(output, "%s%d", FMT_FG_WHITE, counter);
   }
 }
 
