@@ -109,10 +109,12 @@ int git_dirty_info(char *stats_part) {
   int stats = 0;
   char line[1024];
   int output_size = 0;
+  int numlines = 0;
 
   fp = popen("git status --porcelain", "r");
 
   while (fgets(line, 1023, fp)) {
+    numlines++;
     switch(line[1]) {
       ADD_FLAG_IF_MARKER('D', WORKING_DELETED);
       ADD_FLAG_IF_MARKER('M', WORKING_MODIFIED);
@@ -147,7 +149,7 @@ int git_dirty_info(char *stats_part) {
 
   strcat(stats_part, FMT_FG_RESET);
   if (output_size > 0) {
-    strcat(stats_part, " ");
+    sprintf(stats_part + strlen(stats_part), "%d ", numlines);
   }
 
   return stats;
