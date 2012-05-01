@@ -5,15 +5,7 @@
 #include <unistd.h>
 #include <time.h>
 
-#define FMT_FG_RESET   "%{\x1b[0m%}"
-#define FMT_FG_BLACK   "%{\x1b[30m%}"
-#define FMT_FG_RED     "%{\x1b[31m%}"
-#define FMT_FG_GREEN   "%{\x1b[32m%}"
-#define FMT_FG_YELLOW  "%{\x1b[33m%}"
-#define FMT_FG_BLUE    "%{\x1b[34m%}"
-#define FMT_FG_MAGENTA "%{\x1b[35m%}"
-#define FMT_FG_WHITE   "%{\x1b[37m%}"
-#define FMT_FG_GRAY    "%{\x1b[93m%}"
+#include "colors.h"
 
 int get_git_dir(char *git_dir) {
   FILE *fd;
@@ -191,7 +183,7 @@ void get_stash_info(const char *git_dir, char *output) {
   strcat(filename, "/logs/refs/stash");
 
   if (access(filename, F_OK)) {
-    strcat(output, " ");
+    strcpy(output, " ");
   } else {
     fp = fopen(filename, "r");
     while (fgets(buf, 2000, fp) != NULL) counter++;
@@ -199,7 +191,7 @@ void get_stash_info(const char *git_dir, char *output) {
   }
 }
 
-int main() {
+int generate_git_prompt(char *git_info) {
   char refname[128];
   char git_d_info[512];
   char time_elapsed[32];
@@ -222,14 +214,22 @@ int main() {
     strcpy(refname, "*");
   }
 
-  printf("%s %s%s%s%s%s",
+  sprintf(git_info,
+      "%s %s%s%s%s%s",
       time_elapsed,
       refname_color,
       refname,
       stash_info,
       git_d_info,
       FMT_FG_RESET);
+
   return 0;
 }
 
 
+int main() {
+  char git_info[256];
+  generate_git_prompt(git_info);
+  printf("%s", git_info);
+  return 0;
+}
