@@ -226,10 +226,23 @@ int generate_git_prompt(char *git_info) {
   return 0;
 }
 
+void generate_ruby_info(char *output) {
+  char *env = getenv("RUBY_HEAP_MIN_SLOTS");
+  int turbo = (env != NULL);
+
+  if (turbo) {
+    sprintf(output, "%s+ ", FMT_FG_RED);
+  } else {
+    sprintf(output, "%s- ", FMT_FG_RED);
+  }
+}
+
 
 int main() {
-  char git_info[256];
+  char git_info[512];
+  char ruby_info[32];
+  generate_ruby_info(ruby_info);
   generate_git_prompt(git_info);
-  printf("%s", git_info);
+  printf("%s%s", ruby_info, git_info);
   return 0;
 }
