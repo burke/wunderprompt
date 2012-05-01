@@ -54,24 +54,38 @@ void git_commit_time_elapsed(char *ret) {
   }
 }
 
-#define WORKING_DELETED  0x0001
-#define WORKING_MODIFIED 0x0004
-#define WORKING_ADDED    0x0010
-#define WORKING_UNMERGED 0x0040
+#define WORKING_DELETED   0x0001
+#define WORKING_MODIFIED  0x0004
+#define WORKING_ADDED     0x0010
+#define WORKING_UNMERGED  0x0040
+#define WORKING_RENAMED   0x0100
+#define WORKING_COPIED    0x0400
+#define WORKING_UNTRACKED 0x1000
+#define WORKING_IGNORED   0x4000
 
-#define INDEX_DELETED    0x0100
-#define INDEX_MODIFIED   0x0400
-#define INDEX_ADDED      0x1000
-#define INDEX_UNMERGED   0x4000
+#define INDEX_DELETED     0x00010000
+#define INDEX_MODIFIED    0x00040000
+#define INDEX_ADDED       0x00100000
+#define INDEX_UNMERGED    0x00400000
+#define INDEX_RENAMED     0x01000000
+#define INDEX_COPIED      0x04000000
+#define INDEX_UNTRACKED   0x10000000
+#define INDEX_IGNORED     0x40000000
 
-#define MARKER_DELETED "D"
-#define MARKER_MODIFIED "M"
-#define MARKER_ADDED "?"
-#define MARKER_UNMERGED "U"
+#define MARKER_DELETED    "D"
+#define MARKER_MODIFIED   "M"
+#define MARKER_ADDED      "A"
+#define MARKER_UNMERGED   "U"
+#define MARKER_RENAMED    "R"
+#define MARKER_COPIED     "C"
+#define MARKER_UNTRACKED  "?"
+#define MARKER_IGNORED    "!"
 
 #define FMT_STAGED     "%{\x1b[32m%}"
 #define FMT_UNSTAGED   "%{\x1b[31m%}"
 #define FMT_STAGED_UNSTAGED "%{\x1b[34m%}"
+
+#define ADD_FLAG_IF_MARKER(_flag, _marker) case _flag: stats |= _marker; break
 
 int append_git_status_info(char *stats_part, int stats, int working_mask, int index_mask, char *output) {
   if (stats & working_mask) {
@@ -100,32 +114,24 @@ int git_dirty_info(char *stats_part) {
 
   while (fgets(line, 1023, fp)) {
     switch(line[1]) {
-    case 'D':
-      stats |= WORKING_DELETED;
-      break;
-    case 'M':
-      stats |= WORKING_MODIFIED;
-      break;
-    case '?':
-      stats |= WORKING_ADDED;
-      break;
-    case 'U':
-      stats |= WORKING_UNMERGED;
-      break;
+      ADD_FLAG_IF_MARKER('D', WORKING_DELETED);
+      ADD_FLAG_IF_MARKER('M', WORKING_MODIFIED);
+      ADD_FLAG_IF_MARKER('A', WORKING_ADDED);
+      ADD_FLAG_IF_MARKER('U', WORKING_UNMERGED);
+      ADD_FLAG_IF_MARKER('R', WORKING_RENAMED);
+      ADD_FLAG_IF_MARKER('C', WORKING_COPIED);
+      ADD_FLAG_IF_MARKER('?', WORKING_UNTRACKED);
+      ADD_FLAG_IF_MARKER('!', WORKING_IGNORED);
     }
     switch(line[0]) {
-    case 'D':
-      stats |= INDEX_DELETED;
-      break;
-    case 'M':
-      stats |= INDEX_MODIFIED;
-      break;
-    case '?':
-      stats |= INDEX_ADDED;
-      break;
-    case 'U':
-      stats |= INDEX_UNMERGED;
-      break;
+      ADD_FLAG_IF_MARKER('D', INDEX_DELETED);
+      ADD_FLAG_IF_MARKER('M', INDEX_MODIFIED);
+      ADD_FLAG_IF_MARKER('A', INDEX_ADDED);
+      ADD_FLAG_IF_MARKER('U', INDEX_UNMERGED);
+      ADD_FLAG_IF_MARKER('R', INDEX_RENAMED);
+      ADD_FLAG_IF_MARKER('C', INDEX_COPIED);
+      ADD_FLAG_IF_MARKER('?', INDEX_UNTRACKED);
+      ADD_FLAG_IF_MARKER('!', INDEX_IGNORED);
     }
   }
   pclose(fp);
@@ -134,6 +140,10 @@ int git_dirty_info(char *stats_part) {
   output_size += append_git_status_info(stats_part, stats, WORKING_MODIFIED, INDEX_MODIFIED, MARKER_MODIFIED);
   output_size += append_git_status_info(stats_part, stats, WORKING_ADDED, INDEX_ADDED, MARKER_ADDED);
   output_size += append_git_status_info(stats_part, stats, WORKING_UNMERGED, INDEX_UNMERGED, MARKER_UNMERGED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_RENAMED, INDEX_RENAMED, MARKER_RENAMED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_COPIED, INDEX_COPIED, MARKER_COPIED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_UNTRACKED, INDEX_UNTRACKED, MARKER_UNTRACKED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_IGNORED, INDEX_IGNORED, MARKER_IGNORED);
 
   strcat(stats_part, FMT_FG_RESET);
   if (output_size > 0) {
