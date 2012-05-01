@@ -15,10 +15,6 @@
 #define FMT_FG_WHITE   "%{\x1b[37m%}"
 #define FMT_FG_GRAY    "%{\x1b[93m%}"
 
-#define FMT_STAGED     "%{\x1b[30m%}"
-#define FMT_UNSTAGED   "%{\x1b[34m%}"
-#define FMT_STAGED_UNSTAGED "%{\x1b[31m%}"
-
 void get_git_dir(char *git_dir) {
   FILE *fd;
 
@@ -58,6 +54,39 @@ void git_commit_time_elapsed(char *ret) {
   }
 }
 
+#define WORKING_DELETED  0x0001
+#define WORKING_MODIFIED 0x0004
+#define WORKING_ADDED    0x0010
+#define WORKING_UNMERGED 0x0040
+
+#define INDEX_DELETED    0x0100
+#define INDEX_MODIFIED   0x0400
+#define INDEX_ADDED      0x1000
+#define INDEX_UNMERGED   0x4000
+
+#define MARKER_DELETED "D"
+#define MARKER_MODIFIED "M"
+#define MARKER_ADDED "?"
+#define MARKER_UNMERGED "U"
+
+#define FMT_STAGED     "%{\x1b[32m%}"
+#define FMT_UNSTAGED   "%{\x1b[31m%}"
+#define FMT_STAGED_UNSTAGED "%{\x1b[34m%}"
+
+void append_git_status_info(char *stats_part, int stats, int working_mask, int index_mask, char *output) {
+  if (stats & working_mask) {
+    if (stats & index_mask) {
+      strcat(stats_part, FMT_STAGED_UNSTAGED);
+    } else {
+      strcat(stats_part, FMT_UNSTAGED);
+    }
+    strcat(stats_part, output);
+  } else if (stats & index_mask) {
+    strcat(stats_part, FMT_STAGED);
+    strcat(stats_part, output);
+  }
+}
+
 int git_dirty_info(char *stats_part) {
   FILE *fp;
   int stats = 0;
@@ -68,71 +97,41 @@ int git_dirty_info(char *stats_part) {
   while (fgets(line, 1023, fp)) {
     switch(line[1]) {
     case 'D':
-      stats |= 0x0001;
+      stats |= WORKING_DELETED;
       break;
     case 'M':
-      stats |= 0x0004;
+      stats |= WORKING_MODIFIED;
       break;
     case '?':
-      stats |= 0x0010;
+      stats |= WORKING_ADDED;
+      break;
+    case 'U':
+      stats |= WORKING_UNMERGED;
       break;
     }
     switch(line[0]) {
     case 'D':
-      stats |= 0x0040;
+      stats |= INDEX_DELETED;
       break;
     case 'M':
-      stats |= 0x0100;
+      stats |= INDEX_MODIFIED;
       break;
     case '?':
-      stats |= 0x0400;
+      stats |= INDEX_ADDED;
+      break;
+    case 'U':
+      stats |= INDEX_UNMERGED;
       break;
     }
   }
   pclose(fp);
 
-  if (stats & 0x0001) {
-    strcat(stats_part, FMT_UNSTAGED);
-    if (stats & 0x0040) {
-      strcat(stats_part, FMT_STAGED_UNSTAGED);
-    }
-    strcat(stats_part, "D");
+  append_git_status_info(stats_part, stats, WORKING_DELETED, INDEX_DELETED, MARKER_DELETED);
+  append_git_status_info(stats_part, stats, WORKING_MODIFIED, INDEX_MODIFIED, MARKER_MODIFIED);
+  append_git_status_info(stats_part, stats, WORKING_ADDED, INDEX_ADDED, MARKER_ADDED);
+  append_git_status_info(stats_part, stats, WORKING_UNMERGED, INDEX_UNMERGED, MARKER_UNMERGED);
+
   strcat(stats_part, FMT_FG_RESET);
-  }
-  if (stats & 0x0004) {
-    strcat(stats_part, FMT_UNSTAGED);
-    if (stats & 0x0100) {
-      strcat(stats_part, FMT_STAGED_UNSTAGED);
-    }
-    strcat(stats_part, "M");
-  strcat(stats_part, FMT_FG_RESET);
-  }
-  if (stats & 0x0010) {
-    strcat(stats_part, FMT_UNSTAGED);
-    if (stats & 0x0400) {
-      strcat(stats_part, FMT_STAGED_UNSTAGED);
-    }
-    strcat(stats_part, "?");
-  strcat(stats_part, FMT_FG_RESET);
-  }
-  if (stats & 0x0040) {
-  strcat(stats_part, FMT_STAGED);
-    if (!(stats & 0x0001))
-      strcat(stats_part, "D");
-  strcat(stats_part, FMT_FG_RESET);
-  }
-  if (stats & 0x0100) {
-  strcat(stats_part, FMT_STAGED);
-    if (!(stats & 0x0004))
-      strcat(stats_part, "M");
-  strcat(stats_part, FMT_FG_RESET);
-  }
-  if (stats & 0x0400) {
-  strcat(stats_part, FMT_STAGED);
-    if (!(stats & 0x0010))
-      strcat(stats_part, "?");
-  strcat(stats_part, FMT_FG_RESET);
-  }
 
   return stats;
 }
