@@ -73,7 +73,7 @@ void git_commit_time_elapsed(char *ret) {
 #define FMT_UNSTAGED   "%{\x1b[31m%}"
 #define FMT_STAGED_UNSTAGED "%{\x1b[34m%}"
 
-void append_git_status_info(char *stats_part, int stats, int working_mask, int index_mask, char *output) {
+int append_git_status_info(char *stats_part, int stats, int working_mask, int index_mask, char *output) {
   if (stats & working_mask) {
     if (stats & index_mask) {
       strcat(stats_part, FMT_STAGED_UNSTAGED);
@@ -81,16 +81,20 @@ void append_git_status_info(char *stats_part, int stats, int working_mask, int i
       strcat(stats_part, FMT_UNSTAGED);
     }
     strcat(stats_part, output);
+    return 1;
   } else if (stats & index_mask) {
     strcat(stats_part, FMT_STAGED);
     strcat(stats_part, output);
+    return 1;
   }
+  return 0;
 }
 
 int git_dirty_info(char *stats_part) {
   FILE *fp;
   int stats = 0;
   char line[1024];
+  int output_size = 0;
 
   fp = popen("git status --porcelain", "r");
 
@@ -126,10 +130,10 @@ int git_dirty_info(char *stats_part) {
   }
   pclose(fp);
 
-  append_git_status_info(stats_part, stats, WORKING_DELETED, INDEX_DELETED, MARKER_DELETED);
-  append_git_status_info(stats_part, stats, WORKING_MODIFIED, INDEX_MODIFIED, MARKER_MODIFIED);
-  append_git_status_info(stats_part, stats, WORKING_ADDED, INDEX_ADDED, MARKER_ADDED);
-  append_git_status_info(stats_part, stats, WORKING_UNMERGED, INDEX_UNMERGED, MARKER_UNMERGED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_DELETED, INDEX_DELETED, MARKER_DELETED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_MODIFIED, INDEX_MODIFIED, MARKER_MODIFIED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_ADDED, INDEX_ADDED, MARKER_ADDED);
+  output_size += append_git_status_info(stats_part, stats, WORKING_UNMERGED, INDEX_UNMERGED, MARKER_UNMERGED);
 
   strcat(stats_part, FMT_FG_RESET);
 
@@ -168,11 +172,11 @@ void get_stash_info(const char *git_dir, char *output) {
   strcat(filename, "/logs/refs/stash");
 
   if (access(filename, F_OK)) {
-    output[0] = 0;
+    strcat(output, " ");
   } else {
     fp = fopen(filename, "r");
     while (fgets(buf, 2000, fp) != NULL) counter++;
-    sprintf(output, "%s%d", FMT_FG_WHITE, counter);
+    sprintf(output, "%s%d ", FMT_FG_WHITE, counter);
   }
 }
 
@@ -195,10 +199,6 @@ int main() {
 
   if (!strcmp(refname, "master")) {
     strcpy(refname, "*");
-  }
-
-  if (strlen(git_d_info) != 0) {
-    strcat(stash_info, " ");
   }
 
   printf("%s %s%s%s%s%s",
