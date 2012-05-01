@@ -136,6 +136,9 @@ int git_dirty_info(char *stats_part) {
   output_size += append_git_status_info(stats_part, stats, WORKING_UNMERGED, INDEX_UNMERGED, MARKER_UNMERGED);
 
   strcat(stats_part, FMT_FG_RESET);
+  if (output_size > 0) {
+    strcat(stats_part, " ");
+  }
 
   return stats;
 }
