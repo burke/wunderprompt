@@ -15,13 +15,17 @@
 #define FMT_FG_WHITE   "%{\x1b[37m%}"
 #define FMT_FG_GRAY    "%{\x1b[93m%}"
 
-void get_git_dir(char *git_dir) {
+int get_git_dir(char *git_dir) {
   FILE *fd;
 
-  fd = popen("git rev-parse --git-dir", "r");
+  fd = popen("git rev-parse --git-dir 2>/dev/null", "r");
   fgets(git_dir, 1023, fd);
+
+  if (strlen(git_dir) == 0) return 1;
+
   git_dir[strlen(git_dir)-1] = 0;
   pclose(fd);
+  return 0;
 }
 
 long git_last_commit() {
@@ -205,9 +209,11 @@ int main() {
 
   int dirty;
 
+  if (get_git_dir(git_dir)) {
+    return 1;
+  }
   git_commit_time_elapsed(time_elapsed);
   dirty = git_dirty_info(git_d_info);
-  get_git_dir(git_dir);
   get_refname(git_dir, refname);
   get_refname_color(git_dir, refname, dirty, refname_color);
   get_stash_info(git_dir, stash_info);
