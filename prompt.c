@@ -226,6 +226,41 @@ int generate_git_prompt(char *git_info) {
   return 0;
 }
 
+void generate_hostname_color(char *output) {
+  char hostname[256];
+  gethostname(hostname, 256);
+  if (!strncmp(hostname, "burke", 5)) {
+    sprintf(output, "%s", FMT_FG_BLUE);
+  } else if (!strcmp(hostname, "hoth")) {
+    sprintf(output, "%s", FMT_FG_YELLOW);
+  } else {
+    sprintf(output, "%s", FMT_FG_RED);
+  }
+}
+
+void generate_status_and_prompt(char *output, char *prev_exit) {
+  if (strncmp(prev_exit, "0", 1)) {
+    sprintf(output, "%s%s%%%%", FMT_FG_RED, prev_exit);
+  } else {
+    sprintf(output, "%s%%%%", FMT_FG_GREEN);
+  }
+}
+
+void generate_path_info(char *output) {
+  char cwd[256];
+  char *ptr = cwd;
+  int i;
+  getcwd(cwd, 256);
+
+  for (i = strlen(cwd); i > 0; i--) {
+    if (cwd[i] == '/') {
+      ptr = cwd + i + 1;
+      break;
+    }
+  }
+  sprintf(output, "%s", ptr);
+}
+
 void generate_ruby_info(char *output) {
   char *env = getenv("RUBY_HEAP_MIN_SLOTS");
   int turbo = (env != NULL);
@@ -238,11 +273,23 @@ void generate_ruby_info(char *output) {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
+  char *prev_exit;
+  if (argc < 2) {
+    prev_exit = "0";
+  } else {
+    prev_exit = argv[1];
+  }
+  char hostname_color[16];
+  char path_info[256];
   char git_info[512];
   char ruby_info[32];
+  char status_and_prompt[32];
+  generate_hostname_color(hostname_color);
+  generate_path_info(path_info);
   generate_ruby_info(ruby_info);
   generate_git_prompt(git_info);
-  printf("%s%s", ruby_info, git_info);
+  generate_status_and_prompt(status_and_prompt, prev_exit);
+  printf("%s%s %s%s%s%s ", hostname_color, path_info, ruby_info, git_info, status_and_prompt, FMT_FG_RESET);
   return 0;
 }
