@@ -6,16 +6,8 @@
 #include "components/git.h"
 #include "components/prompt.h"
 
-char *extract_previous_exit_code(int argc, char *argv[]) {
-  if (argc < 2) {
-    return "0";
-  } else {
-    return argv[1];
-  }
-}
-
 int main(int argc, char *argv[]) {
-  char *prev_exit = extract_previous_exit_code(argc, argv);
+  char *prev_exit = argc < 2 ? "0" : argv[1];
   char path_info[256], git_info[512], ruby_info[32], status_and_prompt[32];
 
   generate_path_info(path_info);
