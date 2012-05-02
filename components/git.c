@@ -7,16 +7,21 @@
 #include "../colors.h"
 
 int get_git_dir(char *git_dir) {
-  FILE *fd;
+  int i;
+  char cwd[1024];
+  getcwd(cwd, 1024);
 
-  fd = popen("git rev-parse --git-dir 2>/dev/null", "r");
-  fgets(git_dir, 1023, fd);
+  for (i = strlen(cwd); i >= 0; i--) {
+    if (cwd[i] == '/') {
+      strcpy(cwd + i + 1, ".git");
+      if (!access(cwd, F_OK)) {
+        strcpy(git_dir, cwd);
+        return 0;
+      }
+    }
+  }
 
-  if (strlen(git_dir) == 0) return 1;
-
-  git_dir[strlen(git_dir)-1] = 0;
-  pclose(fd);
-  return 0;
+  return 1;
 }
 
 long git_last_commit() {
