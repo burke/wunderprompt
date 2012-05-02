@@ -10,6 +10,7 @@ int get_git_dir(char *git_dir) {
   int i;
   char cwd[1024];
   getcwd(cwd, 1024);
+  strcat(cwd, "/");
 
   for (i = strlen(cwd); i >= 0; i--) {
     if (cwd[i] == '/') {
