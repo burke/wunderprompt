@@ -24,21 +24,28 @@ int get_git_dir(char *git_dir) {
   return 1;
 }
 
-long git_last_commit() {
+long git_last_activity(char *git_dir) {
   FILE *fd;
-  char timestamp[1024];
+  char line[1024];
+  char filename[1024];
+  char *timestamp;
 
-  fd = popen("git log -n1 --format=%ct", "r");
-  fgets(timestamp, 1023, fd);
-  pclose(fd);
+  strcpy(filename, git_dir);
+  strcat(filename, "/logs/HEAD");
+
+  fd = fopen(filename, "r");
+  while(fgets(line, 1023, fd) != NULL);
+
+  timestamp = (index(line, '>') + 2);
+  timestamp[10] = 0;
 
   return atol(timestamp);
 }
 
-void git_commit_time_elapsed(char *ret) {
-  long last_commit = git_last_commit();
+void git_activity_time_elapsed(char *ret, char *git_dir) {
+  long last_activity = git_last_activity(git_dir);
 
-  long diff = time(NULL) - last_commit;
+  long diff = time(NULL) - last_activity;
   int diff_min = (int)(diff / 60);
 
   if (diff_min < 10) {
@@ -111,7 +118,7 @@ int git_dirty_info(char *stats_part) {
   int output_size = 0;
   int numlines = 0;
 
-  fp = popen("git status --porcelain", "r");
+  fp = popen("git status --porcelain 2>/dev/null", "r");
 
   while (fgets(line, 1023, fp)) {
     numlines++;
@@ -208,7 +215,7 @@ int generate_git_prompt(char *git_info) {
   if (get_git_dir(git_dir)) {
     return 1;
   }
-  git_commit_time_elapsed(time_elapsed);
+  git_activity_time_elapsed(time_elapsed, git_dir);
   dirty = git_dirty_info(git_d_info);
   get_refname(git_dir, refname);
   get_refname_color(git_dir, refname, dirty, refname_color);
