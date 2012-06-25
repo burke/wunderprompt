@@ -89,23 +89,19 @@ void git_activity_time_elapsed(char *ret, char *git_dir) {
 #define MARKER_UNTRACKED  "?"
 #define MARKER_IGNORED    "!"
 
-#define FMT_STAGED     "%{\x1b[32m%}"
-#define FMT_UNSTAGED   "%{\x1b[31m%}"
-#define FMT_STAGED_UNSTAGED "%{\x1b[34m%}"
-
 #define ADD_FLAG_IF_MARKER(_flag, _marker) case _flag: stats |= _marker; break
 
 int append_git_status_info(char *stats_part, int stats, int working_mask, int index_mask, char *output) {
   if (stats & working_mask) {
     if (stats & index_mask) {
-      strcat(stats_part, FMT_STAGED_UNSTAGED);
+      strcat(stats_part, FMT_FG_GREEN);
     } else {
-      strcat(stats_part, FMT_UNSTAGED);
+      strcat(stats_part, FMT_FG_RED);
     }
     strcat(stats_part, output);
     return 1;
   } else if (stats & index_mask) {
-    strcat(stats_part, FMT_STAGED);
+    strcat(stats_part, FMT_FG_BLUE);
     strcat(stats_part, output);
     return 1;
   }
