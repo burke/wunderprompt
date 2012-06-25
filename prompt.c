@@ -15,7 +15,8 @@ int main(int argc, char *argv[]) {
   generate_git_prompt(git_info);
   generate_status_and_prompt(status_and_prompt, prev_exit);
 
-  printf("%s %s%s%s%s ", path_info, ruby_info, git_info, status_and_prompt, FMT_FG_RESET);
+  //printf("%s %s%s%s%s ", path_info, ruby_info, git_info, status_and_prompt, FMT_FG_RESET);
+  printf("%s %s%s%s ", path_info, git_info, status_and_prompt, FMT_FG_RESET);
 
   return 0;
 }
