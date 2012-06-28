@@ -207,6 +207,8 @@ int generate_git_prompt(char *git_info) {
   char stash_info[32];
   char refname_color[32];
 
+  git_d_info[0]='\0';
+
   int dirty;
 
   if (get_git_dir(git_dir)) {
