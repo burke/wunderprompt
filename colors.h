@@ -1,5 +1,5 @@
 #ifdef ZSH
-#define FMT_CODE(i) "{%\x1b[" #i "m%}"
+#define FMT_CODE(i) "%{\x1b[" #i "m%}"
 #else
 #define FMT_CODE(i) "\x1b[" #i "m"
 #endif
