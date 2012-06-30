@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #include "../colors.h"
 
@@ -16,8 +17,27 @@ int get_git_dir(char *git_dir) {
     if (cwd[i] == '/') {
       strcpy(cwd + i + 1, ".git");
       if (!access(cwd, F_OK)) {
-        strcpy(git_dir, cwd);
-        return 0;
+        struct stat st_buf;
+        stat (cwd, &st_buf);
+        if (S_ISDIR (st_buf.st_mode)) {
+          strcpy(git_dir, cwd);
+          return 0;
+        }
+        else {
+          // Assume the .git file tells the location of the gitdir
+          FILE *fd;
+          char line[1024];
+          fd = fopen (cwd, "r");
+          while(fgets(line, 1023, fd) != NULL);
+          line[strlen(line)-1] = 0;
+          fclose(fd);
+
+          if (strncmp(line, "gitdir: ", 8) == 0) {
+            strcpy(cwd + strlen(cwd)-4, line + 8);
+          }
+          strcpy(git_dir, cwd);
+          return 0;
+        }
       }
     }
   }
@@ -174,6 +194,10 @@ void get_refname(const char *git_dir, char *refname) {
   if (strncmp(refname, "ref: refs/heads/", 16) == 0) {
     strcpy(refname, refname + 16);
     strcpy(filename, git_dir);
+  }
+
+  if (strlen(refname) == 40) {
+    refname[8] = 0;
   }
 }
 
