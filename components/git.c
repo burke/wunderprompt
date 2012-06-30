@@ -36,6 +36,7 @@ long git_last_activity(char *git_dir) {
 
   fd = fopen(filename, "r");
   while(fgets(line, 1023, fd) != NULL);
+  fclose(fd);
 
   timestamp = (index(line, '>') + 2);
   timestamp[10] = 0;
@@ -161,7 +162,8 @@ int git_dirty_info(char *stats_part) {
 
 void get_refname(const char *git_dir, char *refname) {
   FILE *fp;
-  char *filename = strdup(git_dir);
+  char filename[strlen(git_dir)+6];
+  strcpy(filename, git_dir);
   strcat(filename, "/HEAD");
 
   fp = fopen(filename, "r");
@@ -171,7 +173,7 @@ void get_refname(const char *git_dir, char *refname) {
 
   if (strncmp(refname, "ref: refs/heads/", 16) == 0) {
     strcpy(refname, refname + 16);
-    filename = strdup(git_dir);
+    strcpy(filename, git_dir);
   }
 }
 
@@ -195,6 +197,7 @@ void get_stash_info(const char *git_dir, char *output) {
   } else {
     fp = fopen(filename, "r");
     while (fgets(buf, 2000, fp) != NULL) counter++;
+    fclose(fp);
     sprintf(output, "%s%d ", FMT_FG_WHITE, counter);
   }
 }
