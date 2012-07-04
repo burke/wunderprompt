@@ -54,14 +54,18 @@ long git_last_activity(char *git_dir) {
   strcpy(filename, git_dir);
   strcat(filename, "/logs/HEAD");
 
-  fd = fopen(filename, "r");
-  while(fgets(line, 1023, fd) != NULL);
-  fclose(fd);
+  if (access(filename, F_OK)) {
+    return time(NULL);
+  } else {
+    fd = fopen(filename, "r");
+    while(fgets(line, 1023, fd) != NULL);
+    fclose(fd);
 
-  timestamp = (index(line, '>') + 2);
-  timestamp[10] = 0;
+    timestamp = (index(line, '>') + 2);
+    timestamp[10] = 0;
 
-  return atol(timestamp);
+    return atol(timestamp);
+  }
 }
 
 void git_activity_time_elapsed(char *ret, char *git_dir) {
