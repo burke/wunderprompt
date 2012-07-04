@@ -213,7 +213,8 @@ void get_stash_info(const char *git_dir, char *output) {
   FILE *fp;
   char buf[2000];
   int counter = 0;
-  char *filename = strdup(git_dir);
+  char filename[strlen(git_dir)+18];
+  strcpy(filename, git_dir);
   strcat(filename, "/logs/refs/stash");
 
   if (access(filename, F_OK)) {
