@@ -4,7 +4,7 @@
 #include "../colors.h"
 
 #ifdef ZSH
-#define PROMPT_CHARS(prefix) #prefix "%%%%"
+#define PROMPT_CHARS(prefix) #prefix "%%#"
 #else
 #define PROMPT_CHARS(prefix) #prefix "%%"
 #endif

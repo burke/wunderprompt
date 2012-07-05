@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #include "../colors.h"
 
@@ -16,8 +17,27 @@ int get_git_dir(char *git_dir) {
     if (cwd[i] == '/') {
       strcpy(cwd + i + 1, ".git");
       if (!access(cwd, F_OK)) {
-        strcpy(git_dir, cwd);
-        return 0;
+        struct stat st_buf;
+        stat (cwd, &st_buf);
+        if (S_ISDIR (st_buf.st_mode)) {
+          strcpy(git_dir, cwd);
+          return 0;
+        }
+        else {
+          // Assume the .git file tells the location of the gitdir
+          FILE *fd;
+          char line[1024];
+          fd = fopen (cwd, "r");
+          while(fgets(line, 1023, fd) != NULL);
+          line[strlen(line)-1] = 0;
+          fclose(fd);
+
+          if (strncmp(line, "gitdir: ", 8) == 0) {
+            strcpy(cwd + strlen(cwd)-4, line + 8);
+          }
+          strcpy(git_dir, cwd);
+          return 0;
+        }
       }
     }
   }
@@ -34,13 +54,18 @@ long git_last_activity(char *git_dir) {
   strcpy(filename, git_dir);
   strcat(filename, "/logs/HEAD");
 
-  fd = fopen(filename, "r");
-  while(fgets(line, 1023, fd) != NULL);
+  if (access(filename, F_OK)) {
+    return time(NULL);
+  } else {
+    fd = fopen(filename, "r");
+    while(fgets(line, 1023, fd) != NULL);
+    fclose(fd);
 
-  timestamp = (index(line, '>') + 2);
-  timestamp[10] = 0;
+    timestamp = (index(line, '>') + 2);
+    timestamp[10] = 0;
 
-  return atol(timestamp);
+    return atol(timestamp);
+  }
 }
 
 void git_activity_time_elapsed(char *ret, char *git_dir) {
@@ -161,7 +186,8 @@ int git_dirty_info(char *stats_part) {
 
 void get_refname(const char *git_dir, char *refname) {
   FILE *fp;
-  char *filename = strdup(git_dir);
+  char filename[strlen(git_dir)+6];
+  strcpy(filename, git_dir);
   strcat(filename, "/HEAD");
 
   fp = fopen(filename, "r");
@@ -171,7 +197,11 @@ void get_refname(const char *git_dir, char *refname) {
 
   if (strncmp(refname, "ref: refs/heads/", 16) == 0) {
     strcpy(refname, refname + 16);
-    filename = strdup(git_dir);
+    strcpy(filename, git_dir);
+  }
+
+  if (strlen(refname) == 40) {
+    refname[8] = 0;
   }
 }
 
@@ -187,7 +217,8 @@ void get_stash_info(const char *git_dir, char *output) {
   FILE *fp;
   char buf[2000];
   int counter = 0;
-  char *filename = strdup(git_dir);
+  char filename[strlen(git_dir)+18];
+  strcpy(filename, git_dir);
   strcat(filename, "/logs/refs/stash");
 
   if (access(filename, F_OK)) {
@@ -195,6 +226,7 @@ void get_stash_info(const char *git_dir, char *output) {
   } else {
     fp = fopen(filename, "r");
     while (fgets(buf, 2000, fp) != NULL) counter++;
+    fclose(fp);
     sprintf(output, "%s%d ", FMT_FG_WHITE, counter);
   }
 }
@@ -206,6 +238,9 @@ int generate_git_prompt(char *git_info) {
   char git_dir[512];
   char stash_info[32];
   char refname_color[32];
+
+  git_d_info[0]='\0';
+  git_info[0]='\0';
 
   int dirty;
 
