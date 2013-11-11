@@ -7,9 +7,9 @@
 void generate_hostname_color(char *output) {
   char hostname[256];
   gethostname(hostname, 256);
-  if (!strncmp(hostname, "burke", 5)) {
+  if (!strncmp(hostname, "Burke", 5)) {
     sprintf(output, "%s", FMT_FG_BLUE);
-  } else if (!strcmp(hostname, "hoth")) {
+  } else if (!strcmp(hostname, "shopify-dev")) {
     sprintf(output, "%s", FMT_FG_YELLOW);
   } else {
     sprintf(output, "%s", FMT_FG_RED);

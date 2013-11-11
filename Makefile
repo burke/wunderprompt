@@ -1,6 +1,6 @@
 CFLAGS     := -Wall -O3
 SHELL       = /bin/sh
-SHELL_NAME := ZSH
+SHELL_NAME := FISH
 INSTALL    := install
 
 DEFS     = -D$(SHELL_NAME)
