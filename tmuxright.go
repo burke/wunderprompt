@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -41,10 +42,10 @@ func main() {
 	}
 
 	cmd := exec.Command("sh", "-c", "pmset -g batt | tail -1 | awk '{print $2}' | sed 's/\\%\\;//'")
-	out, err := cmd.CombinedOutput()
-	out = []byte(strings.TrimSpace(string(out)))
+	batt, err := cmd.CombinedOutput()
+	batt = []byte(strings.TrimSpace(string(batt)))
 	if err != nil {
-		out = []byte("???")
+		batt = []byte("???")
 	}
 
 	cmd2 := exec.Command("uptime")
@@ -68,10 +69,17 @@ func main() {
 		uptimes[2] = 42
 	}
 
+	ms, err := filepath.Glob(os.Getenv("HOME") + "/.mail/*/INBOX/new/*")
+	color := nobold(237, 233)
+	if len(ms) > 0 {
+		color = nobold(1, 233)
+	}
+	mails := fmt.Sprintf("%s %d", color, len(ms))
+
 	fmt.Printf("%s",
 		nobold(233, -1)+" "+
 			Arrow1+nobold(247, 233)+" "+
-			string(out)+"%"+
+			string(batt)+"%"+
 			nobold(241, 233)+" "+
 			Arrow0+nobold(2, 233)+" "+
 			fmt.Sprintf("%0.1f ", uptimes[0])+
@@ -79,6 +87,11 @@ func main() {
 			fmt.Sprintf("%0.1f ", uptimes[1])+
 			nobold(2, 233)+
 			fmt.Sprintf("%0.1f", uptimes[2])+
+
+			nobold(241, 233)+" "+
+			Arrow0+
+			mails+
+
 			nobold(236, 233)+" "+
 			Arrow1+nobold(252, 236)+" "+
 			time.Now().Format("2006-01-02 15:04")+
