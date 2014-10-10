@@ -69,7 +69,7 @@ func main() {
 		uptimes[2] = 42
 	}
 
-	ms, err := filepath.Glob(os.Getenv("HOME") + "/.mail/*:INBOX/new/*")
+	ms, _ := filepath.Glob(os.Getenv("HOME") + "/.mail/notify/*/new/*")
 	color := nobold(237, 233)
 	if len(ms) > 0 {
 		color = nobold(1, 233)
