@@ -1,1 +1,1 @@
-![screenshot](https://raw.github.com/burke/wunderprompt/master/screenshot.png)
+Defunct: Moved to https://github.com/burke/dotfiles/tree/master/.dotfiles-src
